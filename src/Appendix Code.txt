@@ -1,0 +1,1120 @@
+Appendix: Code
+[ Login]
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+
+$title = 'Login';
+
+if (isset($\_POST\['login'])) {
+
+$errors = array();
+
+$fields = array('Type'=>'type','Username'=> 
+
+'username','Password'=> 'password');
+
+foreach ($fields as $key=> $field) {
+
+if (!isset($\_POST\[$field]) || empty(trim($\_POST\[$field]))) 
+
+{
+
+$errors\[$field] = "$key field is required";
+
+}
+
+}
+
+if (empty($errors)) {
+
+$type = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['type']));
+
+$username = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['username']));
+
+$password = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['password']));
+
+$sql = "SELECT \* FROM `$type` where `password`='$password' 
+
+and `username`='$username' LIMIT 1";
+
+$result = $conn->query($sql);
+
+if ($result->num\_rows > 0) {
+
+while ($row = $result->fetch\_assoc()) {
+
+$\_SESSION\['user\_id'] = $row\['id'];
+
+$\_SESSION\['type'] = $type;
+
+$\_SESSION\['table'] = $type;
+
+header('location:index.php');
+
+exit();
+
+}
+
+} else {
+
+$errors\['login'] = 'Username / Password invalid';
+
+}
+
+}
+
+}
+
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar \& Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top\_page.php'; ?>
+</div>
+<!-- Navbar \& Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid pb-5 wow fadeInUp" data-wow delay="0.1s">
+<div class="container">
+<div class="section-title text-center position-relative pb-
+3 mb-5 mx-auto" style="max-width: 600px;">
+<h5 class="fw-bold text-primary text uppercase">Login</h5>
+<h1 class="mb-0">Please Login</h1>
+</div>
+<div class="row g-5">
+<div class="col-lg-3 col-md-3"></div>
+<div class="col-lg-6 col-md-6 wow zoomIn" data-wow delay="0.3s">
+<form class="singup-form" action="" method="post">
+<?php
+
+if(isset($errors)){
+
+<div class="alert alert-danger"
+style="width: 100%">
+<a href="#" class="close" data dismiss="alert" aria-label="close">&times;</a>
+<strong>Error!</strong> <?php echo
+$error; ?>
+</div>
+<?php }
+
+}
+
+<div class="form-group mb-2">
+<label>Type</label>
+<select class="form-control bg-white"
+name="type">
+<option value="">-- select type --
+</option>
+<?php foreach (get\_types() as $key
+
+<option value="<?php echo $key
+?>" <?php if(isset($_POST['type'])){ if($_POST['type'] == $key){
+echo 'selected'; } } ?> > <?php echo $value; ?> </option>
+<?php } ?>
+</select>
+</div>
+<div class="form-group mb-2">
+<label>Username</label>
+<input type="text" class="form-control"
+name="username" value="<?php if(isset($_POST['username'])){ echo
+$_POST['username']; } ?>">
+</div>
+<div class="form-group mb-2">
+<label>Password</label>
+<input type="password" class="form control" name="password">
+</div>
+<div class="">
+<div class="col-12">
+<p>
+<a href="register_type.php"
+class="text-info"> Create new account?</a>
+</p>
+<p>
+<a
+href="forget_password.php" class="text-info"> Forgot
+Password?</a>
+</p>
+</div>
+</div>
+<div class="form-group mt-3">
+<button type="submit"
+name="login" class="btn btn-primary">Login</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
+ [Register]
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+
+$title = 'Register';
+
+if(!isset($\_GET\['type']) || empty($\_GET\['type'])){
+
+header('location:index.php');
+
+exit();
+
+}
+
+$type = trim($\_GET\['type']);
+
+if(!in\_array($type,\['officer','donor'])){
+
+header('location:index.php');
+
+exit();
+
+}
+
+$table = $type;
+
+if (isset($\_POST\['register'])) {
+
+$errors = array();
+
+if($table == 'donor') {
+
+$fields = array('Name' => 'name', 'E-mail' => 'email', 
+
+'Birthdate' => 'birthdate','Diseases'=>'diseases','Blood 
+
+Type'=>'blood\_type', 'Mobile' => 'mobile', 'Username' => 
+
+'username', 'Password' => 'password', 'Confirm Password' => 
+
+'password\_confirm');
+
+}elseif ($table == 'officer'){
+
+$fields = array('Name' => 'name', 'E-mail' => 'email', 
+
+'Mobile' => 'mobile', 'Address' => 'address', 'Username' => 
+
+'username', 'Password' => 'password', 'Confirm Password' => 
+
+'password\_confirm');
+
+}
+
+foreach ($fields as $key=> $field) {
+
+if (!isset($\_POST\[$field]) || empty(trim($\_POST\[$field]))) 
+
+{
+
+$errors\[$field] = "$key field is required";
+
+}
+
+}
+
+if($table == 'officer'){
+
+$address = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['address']));
+
+}elseif ($table == 'donor'){
+
+$birthdate = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['birthdate']));
+
+$diseases = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['diseases']));
+
+$blood\_type = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['blood\_type']));
+
+}
+
+$name = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['name']));
+
+if (isset($\_POST\['mobile']) \&\& !empty(trim($\_POST\['mobile']))) 
+
+{
+
+$mobile = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['mobile']));
+
+if (strlen($mobile) != 10) {
+
+$errors\['mobile'] = 'Mobile number must contain 10 
+
+numbers';
+
+} elseif (!check\_exist($mobile,"mobile",$table,'id')) {
+
+$errors\['mobile'] = 'Mobile number already exists';
+
+} elseif (!check\_number($mobile)) {
+
+$errors\['mobile'] = 'Mobile number must contain numbers 
+
+only';
+
+}
+
+}
+
+if (isset($\_POST\['email']) \&\& !empty(trim($\_POST\['email']))) {
+
+$email = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['email']));
+
+if (!check\_exist($email,"email",$table,'id')) {
+
+$errors\['email'] = 'E-mail already exists';
+
+} elseif (!valid\_email($email)) {
+
+$errors\['email'] = 'E-mail invalid';
+
+}
+
+}
+
+if (isset($\_POST\['username']) \&\& 
+
+!empty(trim($\_POST\['username']))) {
+
+$username = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['username']));
+
+if (!check\_exist($username,"username",$table,'id')) {
+
+$errors\['username'] = 'Username already exists';
+
+}
+
+}
+
+$password = '';
+
+if (isset($\_POST\['password']) \&\& 
+
+!empty(trim($\_POST\['password']))) {
+
+$password = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['password']));
+
+if (strlen($password) < 3) {
+
+$errors\['password'] = 'Password must be at least 3 
+
+characters long';
+
+$password = '';
+
+}
+
+}
+
+$password\_conf = mysqli\_real\_escape\_string($conn, 
+
+trim($\_POST\['password\_confirm']));
+
+if (!empty($password) \&\& !empty($password\_conf)) {
+
+if ($password != $password\_conf) {
+
+$errors\['password'] = 'Password does not match';
+
+}
+
+}
+
+if (empty($errors)) {
+
+if($table == 'officer') {
+
+$sql = "INSERT INTO `$table` (`email`, `name`, `mobile`, 
+
+`address`, `username`, `password`)"
+
+. " VALUES 
+
+('$email','$name','$mobile','$address','$username','$password')";
+
+}elseif ($table == 'donor'){
+
+$sql = "INSERT INTO `$table` (`email`, `name`, `mobile`, 
+
+`birthdate`,`blood\_type`,`diseases`, `username`, `password`)"
+
+. " VALUES 
+
+('$email','$name','$mobile','$birthdate','$blood\_type','$diseases
+
+','$username','$password')";
+
+}
+
+if ($conn->query($sql) == TRUE) {
+
+header("location:thank2.php");
+
+exit();
+
+} else {
+
+echo $conn->error . '<br>';
+
+echo $sql;
+
+}
+
+}
+
+}
+
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar \& Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top\_page.php'; ?>
+</div>
+<!-- Navbar \& Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid pb-5 wow fadeInUp" data-wow delay="0.1s">
+<div class="container">
+<div class="row g-5">
+<div class="col-lg-3 col-md-3"></div>
+<div class="col-lg-6 col-md-6 wow zoomIn" data-wow delay="0.3s">
+<form action="" method="post"
+enctype="multipart/form-data">
+<div class="row">
+<?php
+
+if(isset($errors)){
+<div class="alert alert-danger"
+style="width: 100%">
+<a href="#" class="close" data dismiss="alert" aria-label="close">&times;</a>
+<strong>Error!</strong> <?php
+echo $error; ?>
+</div>
+<?php }
+}
+?>
+<?php
+if(isset($success)){
+?>
+<div class="alert alert-success"
+style="width: 100%">
+<a href="#" class="close" data dismiss="alert" aria-label="close">&times;</a>
+<strong>Success!</strong> <?php
+echo $success; ?>
+</div>
+<?php
+}
+?>
+<div class="form-group mb-3 col-md-12">
+<label>Name</label>
+<input type="text" maxlength="50"
+class="form-control" name="name" value="<?php
+if(isset($_POST['name'])){ echo $_POST['name']; } ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label>E-mail</label>
+<input type="email" maxlength="60"
+class="form-control" name="email" value="<?php
+if(isset($_POST['email'])){ echo $_POST['email']; } ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label>Mobile</label>
+<input type="text" maxlength="10"
+class="form-control" name="mobile" value="<?php
+if(isset($_POST['mobile'])){ echo $_POST['mobile']; } ?>">
+</div>
+<?php
+if($type == 'officer'){
+?>
+<div class="form-group mb-3 col-md-12">
+<label>Address</label>
+<input type="text" maxlength="200"
+class="form-control" name="address" value="<?php
+if(isset($_POST['address'])){ echo $_POST['address']; } ?>">
+</div>
+<?php }elseif ($type == 'donor'){
+?>
+<div class="col-md-6 mb-3">
+<label>Blood Type</label>
+<select class="form-control bg white" name="blood_type">
+<option value="">-- select 
+blood type --</option>
+<?php foreach (getBloods() as 
+$blood ){ ?>
+<option value="<?php echo
+$blood; ?>" <?php if(isset($_POST['blood_type'])){ 
+if($_POST['blood_type'] == $blood){ echo 'selected'; } } ?> > <?php
+echo $blood; ?> </option>
+<?php } ?>
+</select>
+</div>
+<div class="col-md-6 mb-3">
+<label>Diseases</label>
+<textarea type="text" maxlength="200"
+class="form-control " name="diseases"><?php
+if(isset($_POST['diseases'])){ echo $_POST['diseases']; } 
+?></textarea>
+</div>
+<div class="col-md-6 mb-3">
+<label>Birthdate</label>
+<input type="date" class="form control " name="birthdate" value="<?php
+if(isset($_POST['birthdate'])){ echo $_POST['birthdate']; } ?>">
+</div>
+<?php } ?>
+<div class="col-md-6 mb-3">
+<label>Username</label>
+<input type="text" maxlength="15"
+class="form-control" name="username" value="<?php
+if(isset($_POST['username'])){ echo $_POST['username']; } ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label>Password</label>
+<input type="password" class="form control" name="password">
+</div>
+<div class="col-md-6 mb-3">
+<label>Confirm Password</label>
+<input type="password" maxlength="15"
+class="form-control form-control-lg" name="password_confirm">
+</div>
+<div class="col-md-12">
+<button type="submit" name="register"
+class="btn btn-primary">Register</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
+] [Add need
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+if (!isset($_SESSION['user_id'])) {
+header('location:index.php');
+exit();
+}
+$title = 'Add Blood Need';
+$table = $_SESSION['table'];
+$id = $_SESSION['user_id'];
+if(isset($_POST['register'])){
+$errors = array();
+$fields = array('Blood 
+Type'=>'blood_type','Amount'=>'amount','date'=>'datetime');
+foreach ($fields as $key=>$field){
+if(!isset($_POST[$field]) || empty(trim($_POST[$field]))){
+$errors[$field] = "$key field is required";
+}
+}
+$blood_type = 
+mysqli_real_escape_string($conn,trim($_POST['blood_type']));
+if(isset($_POST['amount']) && !empty($_POST['amount'])){
+$amount = 
+mysqli_real_escape_string($conn,trim($_POST['amount']));
+if(!is_numeric($amount) || strlen($amount) > 6){
+$errors['amount'] = 'Invalid amount';
+}
+}
+if(isset($_POST['datetime']) && !empty($_POST['datetime'])){
+$datetime = 
+mysqli_real_escape_string($conn,trim($_POST['datetime']));
+$date = explode('T',$datetime);
+$dateNew = $date[0];
+if(isset($date[1])){
+$datetime = $dateNew.' '.$date[1].':00';
+}
+if(!validateDate($datetime)){
+$errors['datetime'] = 'Invalid date ';
+}
+}
+if(empty($errors)){
+$sql = "INSERT INTO `need` 
+(`bood_type`,`datetime`,`amount`, `officer_id`) VALUES
+('$blood_type','$datetime','$amount','$id')";
+if ($conn->query($sql) == TRUE) {
+header('location:blood_need.php');
+exit();
+}else{
+echo $conn->error.'<br>';
+echo $sql;
+}
+}
+}
+?>
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar & Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top_page.php'; ?>
+</div>
+<!-- Navbar & Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid wow fadeInUp" data-wow-delay="0.1s">
+<div class="container">
+<div class="row g-5">
+<?php include 'theme/sidebar.php' ?>
+<div class="col-lg-9">
+<div class="mb-5">
+<form class="singup-form" action=""
+method="post" enctype="multipart/form-data">
+<div class="row">
+<?php
+if(isset($errors)){
+foreach ($errors as $error){ ?>
+<div class="alert alert-danger"
+style="width: 100%">
+<a href="#" class="close"
+data-dismiss="alert" aria-label="close">&times;</a>
+<strong>Error!</strong>
+<?php echo $error; ?>
+</div>
+<?php }
+}
+?>
+<div class="col-md-12 mb-3">
+<label>Blood Type</label>
+<select class="form-control bg white" name="blood_type">
+<option value="">-- select 
+blood type --</option>
+<?php foreach (getBloods() as 
+$blood ){ ?>
+<option value="<?php echo
+$blood; ?>" <?php if(isset($_POST['blood_type'])){ 
+if($_POST['blood_type'] == $blood){ echo 'selected'; } } ?> > <?php
+echo $blood; ?> </option>
+<?php } ?>
+</select>
+</div>
+<div class="col-md-6 mb-3">
+<label>Amount</label>
+<input type="text" maxlength="6"
+name="amount" class="form-control" value="<?php if
+(isset($_POST['amount'])){echo $_POST['amount']; } ?>" >
+</div>
+<div class="col-md-6 mb-3">
+<label>Date</label>
+<input type="datetime-local"
+name="datetime" class="form-control" value="<?php if
+(isset($_POST['datetime'])){echo $_POST['datetime']; } ?>" >
+</div>
+<div class="col-md-12">
+<button type="submit" name="register"
+class="btn btn-primary">Add</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
+] Reserve [
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+$title = 'Reserve appointment';
+$form = 1;
+if(isset($_GET['form']) && !empty($_GET['form'])){
+$form = $_GET['form'];
+}
+$question = questions('s'.$form);
+if (!$question) {
+header('location:list.php');
+exit();
+}
+$formInput = 's'.$form;
+if(isset($_POST[$formInput])){
+$field = 'r'.$form;
+if ($question) {
+if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) 
+{
+$errors[$field] = "Please answer";
+}
+if (empty($errors)) {
+$a = mysqli_real_escape_string($conn, 
+trim($_POST[$field]));
+if ($a == $question['next']) {
+$form++;
+if (isset($question['end'])){
+header("location:list.php?");
+exit();
+}
+header("location:reserve.php?form=$form");
+exit();
+}
+header("location:sorry.php");
+exit();
+}
+}
+}
+?>
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar & Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top_page.php'; ?>
+</div>
+<!-- Navbar & Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid pb-5 wow fadeInUp" data-wow delay="0.1s">
+<div class="container">
+<div class="section-title text-center position-relative pb-
+3 mb-5 mx-auto" style="max-width: 600px;">
+<h5 class="fw-bold text-primary text-uppercase"><?php
+echo $title; ?></h5>
+<h1 class="mb-0">Please fill out the following 
+questionnaire / <?php echo $form.'-'.count(getQuestion()); ?></h1>
+</div>
+<div class="row g-5">
+<div class="col-lg-3 col-md-3"></div>
+<div class="col-lg-6 col-md-6 wow zoomIn" data-wow delay="0.3s">
+<?php
+if(isset($errors)){
+foreach ($errors as $error){ ?>
+<div class="alert alert-danger" style="width: 
+100%">
+<a href="#" class="close" data dismiss="alert" aria-label="close">&times;</a>
+<strong>Error!</strong> <?php echo
+$error; ?>
+</div>
+<?php }
+}
+?>
+<form method="post">
+<p><?php echo $form.'- '.$question['question']; 
+?></p>
+<div class="form-check">
+<input class="form-check-input" type="radio"
+name="r<?php echo $form ?>" id="exampleRadios1" value="true">
+<label class="form-check-label"
+for="exampleRadios1">
+Yes
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" type="radio"
+name="r<?php echo $form ?>" id="exampleRadios2" value="false">
+<label class="form-check-label"
+for="exampleRadios2">
+No
+</label>
+</div>
+<div class="form-group mt-3">
+<button type="submit" name="s<?php echo
+$form ?>" class="btn btn-primary"> <i class="bi bi-arrow right"></i></button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
+ [View reservations]
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+$title = 'Manage Reservation';
+$table = $_SESSION['table'];
+$id = $_SESSION['user_id'];
+if (!isset($_SESSION['user_id'])) {
+header('location:index.php');
+exit();
+}
+?>
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar & Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top_page.php'; ?>
+</div>
+<!-- Navbar & Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid wow fadeInUp" data-wow-delay="0.1s">
+<div class="container">
+<div class="row g-5">
+<?php include 'theme/sidebar.php' ?>
+<div class="col-lg-9">
+<div class="mb-5">
+<table class="table table-hover">
+<thead>
+<tr>
+<th scope="col">Date / Time</th>
+<th scope="col">Donor</th>
+<th scope="col">Donor Blood</th>
+<th scope="col">Mobile</th>
+<th scope="col">Status</th>
+<th scope="col">Action</th>
+</tr>
+</thead>
+<tbody>
+<?php
+$sql = "select * from `reservation` where 
+officer_id = $id ";
+$result = $conn->query($sql);
+if($result->num_rows > 0) {
+while($row = $result->fetch_assoc()) {
+$donor = getDonor($row['donor_id']);
+?>
+<tbody>
+<tr>
+<td><?php echo $row['date'].' / 
+'.$row['time']; ?></td>
+<td><?php echo $donor['name']; ?></td>
+<td><?php echo $donor['blood_type']; 
+?></td>
+<td><?php echo $donor['mobile']; ?></td>
+<td><strong class="<?php echo
+status($row['status'])['color']; ?>"><?php echo
+status($row['status'])['name']; ?></strong></td>
+<td>
+<?php if($row['status'] == 0){ ?>
+<a href="o_status.php?id=<?php
+echo $row['id'] ?>&status=2" class="text-success" onclick="return
+confirm('Are you sure approved?')"> Approved </a>
+<?php } ?>
+</td>
+</tr>
+</tbody>
+<?php }} ?>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
+ [Update profile]
+<!DOCTYPE html>
+<html lang="en">
+<?php include "theme/header.php";
+$title = 'Profile';
+$table = $_SESSION['table'];
+$id = $_SESSION['user_id'];
+if (!isset($_SESSION['user_id'])) {
+header('location:index.php');
+exit();
+}
+if (isset($_POST['register'])) {
+$errors = array();
+if($table == 'donor') {
+$fields = array('Name' => 'name', 'E-mail' => 'email', 
+'Birthdate' => 'birthdate','Diseases'=>'diseases','Blood 
+Type'=>'blood_type', 'Mobile' => 'mobile', 'Username' => 
+'username');
+}elseif ($table == 'officer'){
+$fields = array('Name' => 'name', 'E-mail' => 'email', 
+'Mobile' => 'mobile', 'Address' => 'address', 'Username' => 
+'username');
+}else{
+$fields = array('Name' => 'name', 'E-mail' => 'email', 
+'Mobile' => 'mobile', 'Username' => 'username');
+}
+foreach ($fields as $key=> $field) {
+if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) 
+{
+$errors[$field] = "$key field is required";
+}
+}
+if($table == 'officer'){
+$address = mysqli_real_escape_string($conn, 
+trim($_POST['address']));
+}elseif ($table == 'donor'){
+$birthdate = mysqli_real_escape_string($conn, 
+trim($_POST['birthdate']));
+$diseases = mysqli_real_escape_string($conn, 
+trim($_POST['diseases']));
+$blood_type = mysqli_real_escape_string($conn, 
+trim($_POST['blood_type']));
+}
+$name = mysqli_real_escape_string($conn, 
+trim($_POST['name']));
+if (isset($_POST['mobile']) && !empty(trim($_POST['mobile']))) 
+{
+$mobile = mysqli_real_escape_string($conn, 
+trim($_POST['mobile']));
+if (strlen($mobile) != 10) {
+$errors['mobile'] = 'Mobile number must contain 10 
+numbers';
+} elseif (!check_exist($mobile,"mobile",$table,'id',$id)) 
+{
+$errors['mobile'] = 'Mobile number already exists';
+} elseif (!check_number($mobile)) {
+$errors['mobile'] = 'Mobile number must contain numbers 
+only';
+}
+}
+if (isset($_POST['email']) && !empty(trim($_POST['email']))) {
+$email = mysqli_real_escape_string($conn, 
+trim($_POST['email']));
+if (!check_exist($email,"email",$table,'id',$id)) {
+$errors['email'] = 'E-mail already exists';
+} elseif (!valid_email($email)) {
+$errors['email'] = 'E-mail invalid';
+}
+}
+if (isset($_POST['username']) && 
+!empty(trim($_POST['username']))) {
+$username = mysqli_real_escape_string($conn, 
+trim($_POST['username']));
+if (!check_exist($username,"username",$table,'id',$id)) {
+$errors['username'] = 'Username already exists';
+}
+}
+if (empty($errors)) {
+if($table == 'officer') {
+$sql = "UPDATE `$table` SET `email`='$email', 
+`name`='$name', `mobile`='$mobile', `address`='$address', 
+`username`='$username' where id = $id";
+}elseif ($table == 'donor'){
+$sql = "UPDATE `$table` SET `email`='$email', 
+`name`='$name', `mobile`='$mobile',
+`birthdate`='$birthdate',`diseases`='$diseases',`blood_type`='$bl
+ood_type', `username`='$username' where id = $id";
+}elseif ($table == 'admin'){
+$sql = "UPDATE `$table` SET `email`='$email', 
+`name`='$name', `mobile`='$mobile', `username`='$username' where
+id = $id";
+}
+if ($conn->query($sql) == TRUE) {
+$success = 'Update successfully';
+} else {
+echo $conn->error . '<br>';
+echo $sql;
+}
+}
+}
+?>
+<body>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate middle w-100 vh-100 top-50 start-50 d-flex align-items-center 
+justify-content-center">
+<div class="spinner"></div>
+</div>
+<!-- Spinner End -->
+<!-- Topbar Start -->
+<?php include "theme/topbar.php"; ?>
+<!-- Topbar End -->
+<!-- Navbar & Carousel Start -->
+<div class="container-fluid position-relative p-0">
+<?php include "theme/menu.php"; ?>
+<?php include 'theme/top_page.php'; ?>
+</div>
+<!-- Navbar & Carousel End -->
+<!-- Service Start -->
+<div class="container-fluid wow fadeInUp" data-wow-delay="0.1s">
+<div class="container">
+<div class="row g-5">
+<?php include 'theme/sidebar.php' ?>
+<div class="col-lg-9">
+<div class="mb-5">
+<?php
+$sql = "select * from `$table` where `id`='$id' 
+limit 1";
+$result = $conn->query($sql);
+if($result->num_rows > 0) {
+while($row = $result->fetch_assoc()) {
+?>
+<form action="" method="post"
+enctype="multipart/form-data">
+<div class="row">
+<?php
+if(isset($errors)){
+foreach ($errors as $error){ 
+?>
+<div class="alert alert danger" style="width: 100%">
+<a href="#"
+class="close" data-dismiss="alert" aria-label="close">&times;</a>
+<strong>Error!</strong>
+<?php echo $error; ?>
+</div>
+<?php }
+}
+?>
+<?php
+if(isset($success)){
+?>
+<div class="alert alert success" style="width: 100%">
+<a href="#" class="close"
+data-dismiss="alert" aria-label="close">&times;</a>
+<strong>Success!</strong>
+<?php echo $success; ?>
+</div>
+<?php
+}
+?>
+<div class="form-group mb-3 
+col-md-12">
+<label>Name</label>
+<input type="text"
+maxlength="50" class="form-control" name="name" value="<?php
+if(isset($_POST['name'])){ echo $_POST['name']; }else{ echo
+$row['name']; } ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label>E-mail</label>
+<input
+type="email" maxlength="60" class="form-control" name="email"
+value="<?php if(isset($_POST['email'])){ echo $_POST['email']; 
+}else{ echo $row['email']; } ?>">
+</div>
+<div class="col-md-6 mb-3">
+<label>Mobile</label>
+<input type="text"
+maxlength="10" class="form-control" name="mobile" value="<?php
+if(isset($_POST['mobile'])){ echo $_POST['mobile']; }else{ echo
+$row['mobile']; } ?>">
+</div>
+<?php
+if($table == 'officer'){
+?>
+<div class="form-group mb-
+3 col-md-12">
+<label>Address</label>
+<input type="text"
+maxlength="200" class="form-control" name="address" value="<?php
+if(isset($_POST['address'])){ echo $_POST['address']; }else{ echo
+$row['address']; } ?>">
+</div>
+<?php }elseif ($table == 
+'donor'){
+?>
+<div class="col-md-6 mb-
+3">
+<label>Blood Type</label>
+<select class="form control bg-white" name="blood_type">
+<option value="">-
+- select blood type --</option>
+<?php foreach
+(getBloods() as $blood ){ ?>
+<option
+value="<?php echo $blood; ?>" <?php
+if(isset($_POST['blood_type'])){ if($_POST['blood_type'] == 
+$blood){ echo 'selected'; } }else{ if($row['blood_type'] == 
+$blood){ echo 'selected'; } } ?> > <?php echo $blood; ?> </option>
+<?php } ?>
+</select>
+</div>
+<div class="col-md-6 mb-
+3">
+<label>Diseases</label>
+<textarea type="text"
+maxlength="200" class="form-control " name="diseases"><?php
+if(isset($_POST['diseases'])){ echo $_POST['diseases']; }else{ 
+echo $row['diseases']; } ?></textarea>
+</div>
+<div class="col-md-6 mb-
+3">
+<label>Birthdate</label>
+<input type="date"
+class="form-control " name="birthdate" value="<?php
+if(isset($_POST['birthdate'])){ echo $_POST['birthdate']; }else{ 
+echo $row['birthdate']; } ?>">
+</div>
+<?php } ?>
+<div class="col-md-6 mb-3">
+<label>Username</label>
+<input type="text"
+maxlength="15" class="form-control" name="username" value="<?php
+if(isset($_POST['username'])){ echo $_POST['username']; }else{ 
+echo $row['username']; } ?>">
+</div>
+<div class="col-md-12">
+<button type="submit"
+name="register" class="btn btn-primary">Update</button>
+</div>
+</div>
+</form>
+<?php }} ?>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Service End -->
+<?php include 'theme/footer.php';?>
+</body>
+</html>
